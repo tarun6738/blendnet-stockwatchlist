@@ -39,26 +39,30 @@ function Dashboard() {
   }, []);
 
   useEffect(() => {
-    const fetchSuggestions = async () => {
-      try {
-        const response = await fetch(`http://localhost:5000/getsimilarcompanies?keywords=${keywords}`);
-
-        if (response.ok) {
-          const result = await response.json();
-          setSuggestions(result.symbols);
-        } else {
-          console.error('Error fetching similar companies');
+    const delayDebounceFn = setTimeout(() => {
+      const fetchSuggestions = async () => {
+        try {
+          const response = await fetch(`http://localhost:5000/getsimilarcompanies?keywords=${keywords}`);
+          if (response.ok) {
+            const result = await response.json();
+            setSuggestions(result.symbols);
+          } else {
+            console.error('Error fetching similar companies');
+          }
+        } catch (error) {
+          console.error('Error fetching data:', error);
         }
-      } catch (error) {
-        console.error('Error fetching data:', error);
-      }
-    };
+      };
 
-    if (keywords.trim().length > 0) {
-      fetchSuggestions();
-    } else {
-      setSuggestions([]);
-    }
+      if (keywords.trim().length > 0) {
+        fetchSuggestions();
+      } else {
+        setSuggestions([]);
+      }
+    }, 500);
+
+    // Cleanup the timeout
+    return () => clearTimeout(delayDebounceFn);
   }, [keywords]);
 
   const handleSymbolClick = async (symbol) => {
